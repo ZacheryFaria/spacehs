@@ -1,7 +1,7 @@
 module Application.STApi.Agent where
 
 import Application.STApi.Prelude
-import Application.STApi.Types
+import Application.STApi.Types qualified as T
 import Control.Monad
 import Data.Aeson
 import Data.Map qualified as M
@@ -18,9 +18,9 @@ instance ToJSON RegisterRequest
 
 data RegisterResponseData = RegisterResponseData
   { token :: String,
-    agent :: Agent,
-    contract :: Contract,
-    ships :: [Ship]
+    agent :: T.Agent,
+    contract :: T.Contract,
+    ships :: [T.Ship]
   }
   deriving (Show, Generic)
 

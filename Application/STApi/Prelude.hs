@@ -18,6 +18,7 @@ import Network.HTTP.Client.MultipartFormData (addPartHeaders)
 import Network.HTTP.Simple
 import Network.URI (URI, parseURI, relativeTo, uriToString)
 
+-- >>> baseEndpoint
 baseEndpoint :: [Char]
 baseEndpoint = "https://api.spacetraders.io/v2/"
 

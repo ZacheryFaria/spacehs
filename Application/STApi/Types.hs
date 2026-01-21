@@ -1,6 +1,6 @@
 module Application.STApi.Types where
 
-import Application.STApi.Prelude
+import Application.STApi.Prelude (Bool, FromJSON, Int, Maybe, Show, String, defaultOptions, fieldLabelModifier, genericParseJSON, parseJSON)
 import GHC.Generics
 
 data Agent = Agent
