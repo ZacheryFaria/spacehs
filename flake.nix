@@ -29,6 +29,7 @@
           haskellPackages = p: with p; [
             # Haskell dependencies go here
             p.ihp
+            haskell-language-server
             cabal-install
             base
             wai
