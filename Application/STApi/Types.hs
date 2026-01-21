@@ -13,6 +13,8 @@ data Agent = Agent
   }
   deriving (Show, Generic)
 
+instance FromJSON Agent
+
 data ContractTermsPayment = ContractTermsPayment
   { onAccepted :: Int,
     onFulfilled :: Int
@@ -61,7 +63,21 @@ instance FromJSON Contract where
       mapper "contractType" = "type"
       mapper s = s
 
-data ShipRole = FABRICATOR | COMMAND | HARVESTER | HAULER | INTERCEPTOR | EXCAVATOR deriving (Show, Generic)
+data ShipRole
+  = FABRICATOR
+  | HARVESTER
+  | HAULER
+  | INTERCEPTOR
+  | EXCAVATOR
+  | TRANSPORT
+  | REPAIR
+  | SURVEYOR
+  | COMMAND
+  | CARRIER
+  | PATROL
+  | SATELLITE
+  | EXPLORER
+  deriving (Show, Generic)
 
 instance FromJSON ShipRole
 

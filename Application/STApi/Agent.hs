@@ -2,6 +2,7 @@ module Application.STApi.Agent where
 
 import Application.STApi.Prelude
 import Application.STApi.Types
+import Control.Monad
 import Data.Aeson
 import Data.Map qualified as M
 import GHC.Generics
@@ -13,207 +14,31 @@ data RegisterRequest = RegisterRequest
   }
   deriving (Show, Generic)
 
-instance FromJSON RegisterRequest
-
 instance ToJSON RegisterRequest
 
-data RegisterResponse = RegisterResponse
+data RegisterResponseData = RegisterResponseData
   { token :: String,
     agent :: Agent,
-    contract :: Contract
+    contract :: Contract,
+    ships :: [Ship]
   }
+  deriving (Show, Generic)
 
--- {
---   "data": {
---     "token": "string",
---     "agent": {
---       "accountId": "string",
---       "symbol": "string",
---       "headquarters": "string",
---       "credits": 1,
---       "startingFaction": "string",
---       "shipCount": 1
---     },
---     "faction": {
---       "symbol": "COSMIC",
---       "name": "string",
---       "description": "string",
---       "headquarters": "string",
---       "traits": [
---         {
---           "symbol": "BUREAUCRATIC",
---           "name": "string",
---           "description": "string"
---         }
---       ],
---       "isRecruiting": true
---     },
---     "contract": {
---       "id": "string",
---       "factionSymbol": "string",
---       "type": "PROCUREMENT",
---       "terms": {
---         "deadline": "2026-01-20T05:00:08.177Z",
---         "payment": {
---           "onAccepted": 1,
---           "onFulfilled": 1
---         },
---         "deliver": [
---           {
---             "tradeSymbol": "string",
---             "destinationSymbol": "string",
---             "unitsRequired": 1,
---             "unitsFulfilled": 1
---           }
---         ]
---       },
---       "accepted": false,
---       "fulfilled": false,
---       "deadlineToAccept": "2026-01-20T05:00:08.177Z"
---     },
---     "ships": [
---       {
---         "symbol": "string",
---         "registration": {
---           "name": "string",
---           "factionSymbol": "string",
---           "role": "FABRICATOR"
---         },
---         "nav": {
---           "systemSymbol": "string",
---           "waypointSymbol": "string",
---           "route": {
---             "destination": {
---               "symbol": "string",
---               "type": "PLANET",
---               "systemSymbol": "string",
---               "x": 1,
---               "y": 1
---             },
---             "origin": {
---               "symbol": "string",
---               "type": "PLANET",
---               "systemSymbol": "string",
---               "x": 1,
---               "y": 1
---             },
---             "departureTime": "2026-01-20T05:00:08.177Z",
---             "arrival": "2026-01-20T05:00:08.177Z"
---           },
---           "status": "IN_TRANSIT",
---           "flightMode": "CRUISE"
---         },
---         "crew": {
---           "current": 1,
---           "required": 1,
---           "capacity": 1,
---           "rotation": "STRICT",
---           "morale": 1,
---           "wages": 1
---         },
---         "frame": {
---           "symbol": "FRAME_PROBE",
---           "name": "string",
---           "condition": 1,
---           "integrity": 1,
---           "description": "string",
---           "moduleSlots": 1,
---           "mountingPoints": 1,
---           "fuelCapacity": 1,
---           "requirements": {
---             "power": 1,
---             "crew": 1,
---             "slots": 1
---           },
---           "quality": 1
---         },
---         "reactor": {
---           "symbol": "REACTOR_SOLAR_I",
---           "name": "string",
---           "condition": 1,
---           "integrity": 1,
---           "description": "string",
---           "powerOutput": 1,
---           "requirements": {
---             "power": 1,
---             "crew": 1,
---             "slots": 1
---           },
---           "quality": 1
---         },
---         "engine": {
---           "symbol": "ENGINE_IMPULSE_DRIVE_I",
---           "name": "string",
---           "condition": 1,
---           "integrity": 1,
---           "description": "string",
---           "speed": 1,
---           "requirements": {
---             "power": 1,
---             "crew": 1,
---             "slots": 1
---           },
---           "quality": 1
---         },
---         "modules": [
---           {
---             "symbol": "MODULE_MINERAL_PROCESSOR_I",
---             "name": "string",
---             "description": "string",
---             "capacity": 1,
---             "range": 1,
---             "requirements": {
---               "power": 1,
---               "crew": 1,
---               "slots": 1
---             }
---           }
---         ],
---         "mounts": [
---           {
---             "symbol": "MOUNT_GAS_SIPHON_I",
---             "name": "string",
---             "description": "string",
---             "strength": 1,
---             "deposits": [
---               "QUARTZ_SAND"
---             ],
---             "requirements": {
---               "power": 1,
---               "crew": 1,
---               "slots": 1
---             }
---           }
---         ],
---         "cargo": {
---           "capacity": 1,
---           "units": 1,
---           "inventory": [
---             {
---               "symbol": "PRECIOUS_STONES",
---               "name": "string",
---               "description": "string",
---               "units": 1
---             }
---           ]
---         },
---         "fuel": {
---           "current": 1,
---           "capacity": 1,
---           "consumed": {
---             "amount": 1,
---             "timestamp": "2026-01-20T05:00:08.177Z"
---           }
---         },
---         "cooldown": {
---           "shipSymbol": "string",
---           "totalSeconds": 1,
---           "remainingSeconds": 1,
---           "expiration": "2026-01-20T05:00:08.177Z"
---         }
---       }
---     ]
---   }
--- }
---
+instance FromJSON RegisterResponseData
 
+data RegisterResponse = RegisterResponse
+  { responseData :: RegisterResponseData
+  }
+  deriving (Show, Generic)
+
+instance FromJSON RegisterResponse where
+  parseJSON = genericParseJSON dataMapper
+
+registerAgent :: RegisterRequest -> IO RegisterResponse
+registerAgent req = do
+  response <- httpJSON (setRequestBodyJSON req request) :: IO (Response RegisterResponse)
+  return $ getResponseBody response
+  where
+    request =
+      makeRequest "/register" "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyIjoiY203NGE1cjhlMDAyM3RjMGo0MXY2bWl2MCIsInZlcnNpb24iOiJ2Mi4zLjAiLCJpYXQiOjE3NjY4MDYwNzgsInN1YiI6ImFjY291bnQtdG9rZW4ifQ.vJz7YvsgQFvlqT-lUBM25z60ki_JNAC5POQi0tv_qK4bmxR3zgj1FtcNoxWVJ3yrmudIBhNPxOdLUov-Igk1yG-yIL7nefrhaJzrLW3Te806XycPsxX-9nLqDhOeWBAlHpZrZMIoL_K5m9s-abwLPq5bSVn7MfHZqTtEkjo-yzr7sg3sbCadx6Hc4t3ipQfZe0FAXGKkRmRe1Y9oyMm1cUjwF0xYszVRnJOkJcm_m5ocV0y5B761t4XODcbqL97QRZFEqOnB7NZm9sboY3QX1QsajKGxVihtWV7Eg6Z8Huk_djiyhdyIlgCilLo1h1o0wO7xgn02uQpChwgUsgZSHyxNr7Kgoxn4JGioW21oPgG1widlgJkygosvOG1TFi2F7xjiEE5pixp537lMfrDpmCSdv-7_9bpz9cZ3kMH4eGaU4rxhOn-GBR1n0f7X4RPG1RKaz2BiY2DdF101QMlgPuIFO_fGjdgdKSNMvfXy6yeZB_8N70Nu2DgisDecSb2lTBmkhe6Rfxl5OOC3Azryu4vn2DRrJwY3-DnGCi4RpRRkDtSY-L5DZibaMxrQY5GtWNjlFSfPQMG19gTupnDrN5058ClWHa_qtOkQUriH3yzzFEL6HMv0abZL3S10fozu2qBRyJRHkRhokfbWqkjfLR1vz99kNccwafuKg9w29Ds"
+        |> setRequestMethod "POST"
