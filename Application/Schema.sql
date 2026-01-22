@@ -1,7 +1,7 @@
 -- Your database schema. Use the Schema Designer at http://localhost:8001/ to add some tables.
-CREATE TYPE "shipRole" AS ENUM ('fabricator', 'harvester', 'hauler', 'interceptor', 'excavator');
-CREATE TYPE "flightMode" AS ENUM ('drift', 'stealth', 'burn', 'cruise');
-CREATE TYPE "shipStatus" AS ENUM ('in_transit', 'in_orbit', 'docked');
+CREATE TYPE "ship_role" AS ENUM ('fabricator', 'harvester', 'hauler', 'interceptor', 'excavator');
+CREATE TYPE "flight_mode" AS ENUM ('drift', 'stealth', 'burn', 'cruise');
+CREATE TYPE "ship_status" AS ENUM ('in_transit', 'in_orbit', 'docked');
 CREATE TABLE agents (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
     "accountId" TEXT NOT NULL,
@@ -16,11 +16,11 @@ CREATE TABLE ships (
     symbol TEXT NOT NULL,
     "registrationName" TEXT NOT NULL,
     "registrationFactionSymbol" TEXT NOT NULL,
-    "registrationRole" shipRole NOT NULL,
+    "registrationRole" ship_role NOT NULL,
     "navSystemSymbol" TEXT NOT NULL,
     "navWaypointSymbol" TEXT NOT NULL,
-    "navStatus" shipStatus NOT NULL,
-    "navFlightMode" flightMode NOT NULL,
+    "navStatus" ship_status NOT NULL,
+    "navFlightMode" flight_mode NOT NULL,
     "navRouteArrivalTime" TIMESTAMP WITH TIME ZONE NOT NULL,
     "navRouteDepartureTime" TIMESTAMP WITH TIME ZONE NOT NULL,
     "navRouteDestinationSymbol" TEXT NOT NULL,
